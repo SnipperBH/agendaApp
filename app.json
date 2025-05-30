@@ -29,6 +29,8 @@
     },
     "plugins": [
       "@react-native-firebase/app",
+      "expo-router",
+      "expo-notifications",
       [
         "expo-build-properties",
         {
@@ -36,7 +38,21 @@
             "useFrameworks": "static"
           }
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "12345678-aaaa-bbbb-cccc-123456789abc"
+      }
+    }
   }
 }

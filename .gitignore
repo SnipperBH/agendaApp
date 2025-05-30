@@ -3,7 +3,12 @@
 # dependencies
 node_modules/
 
+# firebase
+firebase/*
+
 # Expo
+android/
+ios/
 .expo/
 dist/
 web-build/
@@ -32,6 +37,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
