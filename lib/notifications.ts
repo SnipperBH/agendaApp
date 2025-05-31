@@ -1,18 +1,38 @@
-import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 
 export async function registerForPushNotificationsAsync() {
-    if (!Device.isDevice) return null;
+    if (!Device.isDevice) {
+        console.warn('⚠️ As notificações push só funcionam em dispositivos físicos.');
+        return null;
+    }
 
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== 'granted') return null;
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
 
-    const token = await Notifications.getExpoPushTokenAsync({
-        projectId: 'SEU_PROJECT_ID_DO_EXPO',
-    });
+    if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+    }
 
-    return token.data; // <- Salve isso no backend!
+    if (finalStatus !== 'granted') {
+        console.warn('❌ Permissão para notificações não concedida');
+        return null;
+    }
+
+    try {
+        const tokenResponse = await Notifications.getExpoPushTokenAsync({
+            projectId: Constants.expoConfig?.extra?.eas?.projectId || 'SEU_PROJECT_ID',
+        });
+
+        return tokenResponse.data;
+    } catch (err) {
+        console.error('Erro ao gerar token push:', err);
+        return null;
+    }
 }
+
 
 
 // Config padrão para iOS/Android

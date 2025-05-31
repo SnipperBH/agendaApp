@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   FlatList,
   Dimensions,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { AuthContext } from '../context/AuthContext'; // ajuste o caminho
@@ -15,6 +16,7 @@ import api from '../services/api';
 import io from 'socket.io-client';
 import { router } from 'expo-router';
 import ProtectedRoute from '../context/ProtectdRoute';
+import { registerForPushNotificationsAsync } from '@/lib/notifications';
 
 const socket = io(process.env.API_URL);
 
@@ -24,6 +26,51 @@ export default function HomeScreen() {
   const { user, logout, token, updateUser } = useContext(AuthContext);
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const tokenAlreadySent = useRef(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?._id || !token) {
+        console.warn('Usuário ou token não disponível ainda');
+        return;
+      }
+
+      if (tokenAlreadySent.current) {
+        console.log('🔁 Token já foi enviado anteriormente, ignorando...');
+        return;
+      }
+
+      const tokenPush = await registerForPushNotificationsAsync();
+      console.log(tokenPush)
+
+      if (!tokenPush) {
+        console.warn('⚠️ Não foi possível obter o token push');
+        return;
+      }
+
+      try {
+        await api.put(
+          `/users/tokenPush/${user._id}`,
+          { expoPushToken: tokenPush },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log('📡 Token enviado ao backend com sucesso');
+        tokenAlreadySent.current = true; // Marca como enviado
+      } catch (err) {
+        console.error('❌ Erro ao enviar token push para o backend:', err);
+      }
+    };
+
+    fetchData();
+  }, [user?._id, token]);
+
+
+
 
   const loadProdutos = async () => {
     try {

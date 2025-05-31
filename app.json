@@ -51,8 +51,10 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "12345678-aaaa-bbbb-cccc-123456789abc"
-      }
-    }
+        "projectId": "aac35f08-f98c-40a0-81ef-c5b3c9a663c2"
+      },
+      "router": {}
+    },
+    "owner": "motoflashbh"
   }
 }
